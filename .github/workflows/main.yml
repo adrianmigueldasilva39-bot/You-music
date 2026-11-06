@@ -1,21 +1,31 @@
-name: Build Yoi Music
+name: Build Yoi Music PKG
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/ps3dev/psl1ght:latest
+    container: ps3dev/psl1ght:latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Build
-        run: |
-          make
-          ls -lh *.pkg || ls -lh
-      - name: Upload PKG
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Compilar EBOOT
+        run: make all
+
+      - name: Gerar PKG
+        run: make pkg
+
+      - name: Listar saída
+        run: ls -la build/ || true
+
+      - name: Enviar PKG para download
         uses: actions/upload-artifact@v4
         with:
-          name: YoiMusic-pkg
-          path: "*.pkg"
+          name: yoi-music-pkg
+          path: build/*.pkg
+          if-no-files-found: error
